@@ -1,0 +1,57 @@
+name: Bump dictus cask
+
+on:
+  schedule:
+    - cron: "17 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  bump:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Resolve latest upstream release
+        id: latest
+        run: |
+          tag=$(gh release view --repo getdictus/dictus-desktop --json tagName --jq .tagName)
+          echo "version=${tag#v}" >> "$GITHUB_OUTPUT"
+        env:
+          GH_TOKEN: ${{ github.token }}
+
+      - name: Compare with cask
+        id: check
+        run: |
+          current=$(grep -m1 '^  version "' Casks/dictus.rb | sed 's/.*"\(.*\)".*/\1/')
+          echo "current=$current" >> "$GITHUB_OUTPUT"
+          if [ "$current" = "${{ steps.latest.outputs.version }}" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compute checksums and rewrite cask
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          set -euo pipefail
+          v="${{ steps.latest.outputs.version }}"
+          base="https://github.com/getdictus/dictus-desktop/releases/download/v${v}"
+          arm_sha=$(curl -fsSL "${base}/Dictus_${v}_aarch64.dmg" | shasum -a 256 | cut -d' ' -f1)
+          intel_sha=$(curl -fsSL "${base}/Dictus_${v}_x64.dmg" | shasum -a 256 | cut -d' ' -f1)
+          [ ${#arm_sha} -eq 64 ] && [ ${#intel_sha} -eq 64 ]
+          sed -i "s/^  version \".*\"/  version \"${v}\"/" Casks/dictus.rb
+          sed -i "s/^  sha256 arm:   \".*\"/  sha256 arm:   \"${arm_sha}\"/" Casks/dictus.rb
+          sed -i "s/^         intel: \".*\"/         intel: \"${intel_sha}\"/" Casks/dictus.rb
+          grep -q "${arm_sha}" Casks/dictus.rb && grep -q "${intel_sha}" Casks/dictus.rb
+
+      - name: Commit
+        if: steps.check.outputs.changed == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add Casks/dictus.rb
+          git commit -m "dictus ${{ steps.check.outputs.current }} -> ${{ steps.latest.outputs.version }}"
+          git push
