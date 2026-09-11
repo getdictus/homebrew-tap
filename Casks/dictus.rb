@@ -1,9 +1,9 @@
 cask "dictus" do
   arch arm: "aarch64", intel: "x64"
 
-  version "0.3.0"
-  sha256 arm:   "caf0fa43e41bd28e007a774ca835f16560a1a3dfdee16dd7839b15ebf4dd26fc",
-         intel: "bfd1ded6636172ee453c8d13ed41b39a753d00a99a32e355005d128438dc535d"
+  version "0.0.0-test"
+  sha256 arm:   "0000000000000000000000000000000000000000000000000000000000000000",
+         intel: "1111111111111111111111111111111111111111111111111111111111111111"
 
   url "https://github.com/getdictus/dictus-desktop/releases/download/v#{version}/Dictus_#{version}_#{arch}.dmg"
   name "Dictus"
