@@ -9,6 +9,18 @@ brew tap getdictus/tap
 brew install --cask dictus
 ```
 
+Homebrew 6.0 asks you to confirm trust the first time you install from a third-party tap. To grant it up front:
+
+```sh
+brew trust --cask getdictus/tap/dictus
+```
+
+Already have Dictus in `/Applications`? `--adopt` hands the existing app over to Homebrew instead of reinstalling it:
+
+```sh
+brew install --cask --adopt dictus
+```
+
 ## Uninstall
 
 ```sh
