@@ -23,8 +23,11 @@ cask "dictus" do
   zap trash: [
     "~/Library/Application Support/com.dictus.desktop",
     "~/Library/Caches/com.dictus.desktop",
+    "~/Library/Caches/dictus",
+    "~/Library/Logs/com.dictus.desktop",
     "~/Library/Preferences/com.dictus.desktop.plist",
     "~/Library/Saved Application State/com.dictus.desktop.savedState",
     "~/Library/WebKit/com.dictus.desktop",
+    "~/Library/WebKit/dictus",
   ]
 end
